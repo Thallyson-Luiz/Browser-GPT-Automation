@@ -91,28 +91,44 @@ class ChatGPTAutomation:
         
         Args:
             message: Mensagem a ser enviada
+        
+        return:
+            message: str
         """
         try:
             logger.info(f"Enviando mensagem: {message[:50]}...")
             
             # Localiza o campo de texto (pode variar dependendo da versão do ChatGPT)
-            text_area = self.wait.until(
-                EC.presence_of_element_located((By.TAG_NAME, "textarea"))
+            input = self.wait.until(
+                EC.presence_of_element_located((By.XPATH, "//div[@id='prompt-textarea']/p"))
             )
             
-            text_area.click()
-            text_area.send_keys(message)
+            input.click()
+            input.clear()
+            input.send_keys(message)
             time.sleep(1)
             
             # Procura e clica no botão de enviar
-            send_button = self.driver.find_element(
-                By.XPATH, 
-                "//button[@data-testid='send-button' or contains(@aria-label, 'Send')]"
-            )
-            send_button.click()
-            
-            logger.info("Mensagem enviada com sucesso")
-            
+            try:
+                send_button = self.driver.find_element(
+                    By.XPATH, 
+                    "//button[@id='composer-submit-button']"
+                )
+                send_button.click()
+                
+                logger.info("Mensagem enviada com sucesso")
+            except NoSuchElementException:
+                logger.error("Botão de enviar não encontrado")
+                raise
+
+            time.sleep(10)
+
+            # Aguarda a resposta do ChatGPT
+
+            message_ai = self.wait.until(EC.presence_of_element_located((By.XPATH, "//div[@data-message-author-role='assistant'][last()]")))
+
+            return message_ai.text
+
         except Exception as e:
             logger.error(f"Erro ao enviar mensagem: {e}")
             raise

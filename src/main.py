@@ -51,12 +51,11 @@ def main():
         
         # Mantém o navegador aberto para interação
         logger.info("Navegador aberto. Pressione Ctrl+C para encerrar.")
-        
-        try:
-            while True:
-                time.sleep(1)
-        except KeyboardInterrupt:
-            logger.info("\nEncerrando aplicação...")
+
+        messageNew =chatgpt.send_message("Quantos anos você tem?")
+        logger.info(f"Resposta do ChatGPT:\n\n{messageNew}\n\n")
+
+        logger.info("\nEncerrando aplicação...")
             
     except Exception as e:
         logger.error(f"Erro durante execução: {e}", exc_info=True)
